@@ -1,0 +1,391 @@
+
+
+
+
+<html>
+<head>
+
+    <title> F1 Drivers </title>
+
+    <!-- This section names the document, and sets the encoding standard and document width-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+    <!-- importing the scripts required-->
+    <script src="https://d3js.org/d3.v7.min.js">
+    
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+  
+</head>
+
+<style>
+ * {
+  box-sizing: border-box;
+}
+
+.column {
+  float: left;
+  width: 33.33%;
+  padding: 5px;
+}
+
+/* Clearfix (clear floats) */
+.row::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+table{
+  border: 2px solid black;
+  padding: 5px;
+  text-align: center;
+}
+
+th{
+  border: 2px solid black;
+  padding: 5px;
+  text-align: center;
+  color:rgb(247, 55, 55);
+  background-color: white
+  
+}
+
+td{
+  border: 1px solid black;
+  padding: 5px;
+  text-align: center;
+  color: black
+}
+
+.button {
+  border: none;
+  border-radius: 12px;
+  background-color:rgb(252, 192, 192);
+  color: white;
+
+}
+
+.create-button {background-color: green}
+.update-button {background-color: red}
+.delete-button{background-color: cyan}
+.cancel-button {background-color: orange}
+.showUpdate{background-color: plum}
+.doDelete {background-color: pink}
+
+h1{border-style: solid; border-color: crimson; background-color: blanchedalmond; text-align: center;}
+h2{border-style: solid; border-color: crimson; background-color: blanchedalmond; text-align: center;}
+
+</style>
+
+<body style="background-color:rgb(253, 252, 252);">
+    <!-- Header images and buttons -->
+      <img src = "Images/f1logo.png">
+      <img src = "Images/OIP.jpeg">
+      <img src = "Images/f1logo.png">
+
+      <br>
+      <br>
+      <br>
+
+<!-- Create/Update table code-->
+
+<div id = "create-update" style = "display:none">
+  <h2 style = color:aqua> Create New Driver - Update Existing Driver</h2>
+
+  <table id = "createUpdateForm" class="d-flex p-2">
+    <tr>
+      <td><input type = "hidden" name= "id" id = "idinput"></td>
+    </tr>
+    <tr>
+      <td> Driver No.</td>
+      <td><input type = "text" name = "DriverNo"></td>
+    </tr>
+    <tr>
+      <td>Last Name</td>
+      <td><input type = "text" name = "LastName"></td>
+    </tr>
+    <tr>
+      <td>First Name</td>
+      <td><input type = "text" name = "FirstName"></td>
+    </tr>
+    <tr>
+      <td>Nationality</td>
+      <td><input type = "text" name = "Nationality"></td>
+    </tr>
+    <tr>
+      <td>CurrentTeam</td>
+      <td><input type = "text" name = "CurrentTeam"></td>
+    </tr>
+    <tr>
+      <td><button id = "create-button" onclick = "doCreate()" class "button create-button"> Create Driver</button></td>
+      <td><button id = "update-button" onclick = "doUpdate()" class "button create-button"> Update Driver</button></td>
+      <td><button id = "cancel-button" onclick = "doCancel()" class "button create-button"> Cancel</button></td>
+
+    </tr>
+
+  </table>
+</div>
+
+
+
+<!-- Display Table code with list of Drivers -->
+<div id = "display">
+  <h1 style = "color:aqua"> F1 Drivers</h1>
+  <button onclick = "showCreate()" class = button> Create a Driver Record</button>
+  <p> Click this button to create a new driver record </p>
+  <table border = "1"  id = "driverTable" style = "width:70%">
+    <tr>
+      <th> id </th>
+      <th>Driver Number</th>
+      <th> Last Name</th>
+      <th>First Name</th>
+      <th>Nationality</th>
+      <th> Current Team</th>
+      <th>Update Driver</th>
+      <th>Delete Driver</th>
+    </tr>
+  </table>
+
+</div>
+
+<!-- This section missing out of his code--> 
+   
+
+
+<!-- Script Functions-->
+
+
+<script>
+
+  // This sets the parameters for what elements get seen in each section of the webpage
+
+    function showCreate(){
+      document.getElementById("display").style.display= "none"
+      document.getElementById("update-button").style.display = "none"
+      document.getElementById("create-button").style.display = "block"
+      document.getElementById("create-update").style.display = "block"
+    }
+    
+  // This sets the parameters for the update section of the page
+  // it also helps to take the correct row from the form ready for updating
+    function showUpdate(thisElem){
+      var rowElement = thisElem.parentNode.parentNode;
+      driver = getDriverFromRow(rowElement)
+      populateForm(driver)
+
+      document.getElementById("display").style.display= "none"
+      document.getElementById("update-button").style.display = "block"
+      document.getElementById("create-button").style.display = "none"
+      document.getElementById("create-update").style.display = "block"
+  
+    }
+   // this pulls the driver from the database to be used elsewhere 
+    function getDriverFromRow(rowElement){
+        driver = {}
+        driver.id  = rowElement.getAttribute("id");
+        driver.DriverNo = rowElement.cells[1].firstChild.textContent
+        driver.LastName = rowElement.cells[2].firstChild.textContent
+        driver.FirstName = rowElement.cells[3].firstChild.textContent
+        driver.Nationality = rowElement.cells[4].firstChild.textContent
+        driver.CurrentTeam = rowElement.cells[5].firstChild.textContent
+        
+        return driver
+    }
+    
+    
+    function doUpdate(){
+      driver = getDriverFromForm()
+      updateServer(driver)
+      
+    }
+
+    function doCancel(){
+      showDisplay()
+      clearForm()
+    }
+   
+    function updateServer(driver){
+      $.ajax({
+        url:"http://127.0.0.1:5000/drivers/" + driver.id,
+        data: JSON.stringify(driver),
+        method:"PUT",
+        dataType:"JSON",
+        contentType:"application/json;charset = utf-8",
+        success:function(results){
+          console.log("update", results)
+          updateTableRow(driver)
+          showDisplay()
+          clearForm()
+
+        },
+        error:function(xhr, status, error){
+          console.log("error" + error)
+        }
+
+
+      }
+      )
+    }
+
+    function updateTableRow(driver){
+      rowElement= document.getElementById(driver.id)
+      rowElement.cells[1].firstChild.textContent = driver.DriverNo
+      rowElement.cells[2].firstChild.textContent = driver.LastName
+      rowElement.cells[3].firstChild.textContent = driver.FirstName
+      rowElement.cells[4].firstChild.textContent = driver.Nationality
+      rowElement.cells[5].firstChild.textContent = driver.CurrentTeam
+    }
+
+    
+    
+    function populateForm(driver){
+      var form = document.getElementById("createUpdateForm")
+      form.querySelector('input[name = "id"]').value = driver.id
+      form.querySelector('input[name = "id"]').disabled= true
+      form.querySelector('input[name = "DriverNo"]').value =  driver.DriverNo
+      form.querySelector('input[name = "LastName"]').value = driver.LastName
+      form.querySelector('input[name = "FirstName"]').value = driver.FirstName
+      form.querySelector('input[name = "Nationality"]').value = driver.Nationality
+      form.querySelector('input[name = "CurrentTeam"]').value = driver.CurrentTeam
+      
+    }
+    
+
+    function clearForm(){
+      var form = document.getElementById("createUpdateForm")
+      form.querySelector('input[name = "id"]').value = ''
+      form.querySelector('input[name = "id"]').disabled= false
+      form.querySelector('input[name = "DriverNo"]').value = ''
+      form.querySelector('input[name = "LastName"]').value = ''
+      form.querySelector('input[name = "FirstName"]').value = ''
+      form.querySelector('input[name = "Nationality"]').value = ''
+      form.querySelector('input[name = "CurrentTeam"]').value = ''
+
+    }
+
+
+    function doCreate(){
+      driver = getDriverFromForm()
+
+      $.ajax({
+          url: "http://127.0.0.1:5000/drivers",
+          method:"POST",
+          data:JSON.stringify(driver),
+          dataType: "JSON",
+          contentType: "application/json; charset=utf-8",
+          success:function(results){
+              addDriverToTable(driver)
+              showDisplay()
+              clearForm()
+              location.reload()
+            },
+            error:function(xhr,status,error){
+                console.log("error: "+status+" msg:"+error);
+            }
+        })
+        showDisplay()
+    }
+
+
+    
+
+    function doDelete(thisElem){
+      var tableElement = document.getElementById("driverTable");
+      var rowElement = thisElem.parentNode.parentNode;
+      var index =  rowElement.rowIndex;
+      id = rowElement.getAttribute("id");
+      $.ajax({
+        url: "http://127.0.0.1:5000/drivers/" + id,
+        method:"DELETE",
+        dataType: "JSON",
+        success:function(results){
+              tableElement.deleteRow(index)
+                  
+            },
+            error:function(xhr,status,error){
+                console.log("error: "+status+" msg:"+error);
+            }
+        })
+    }
+
+  function showDisplay(){
+    document.getElementById('display').style.display="block"
+    document.getElementById('create-update').style.display="none"
+
+
+  }
+  
+
+function populateTable(){
+  $.ajax({
+            url: "http://127.0.0.1:5000/drivers",
+            method:"GET",
+            dataType: "JSON",
+            success:function(results){
+                for (driver of results){
+                    addDriverToTable(driver);
+                }
+                
+            },
+            error:function(xhr,status,error){
+                console.log("error: "+status+" msg:"+error);
+            }
+        });
+
+    }
+
+    function getDriverFromForm(){
+      var form = document.getElementById("createUpdateForm")
+      driver = {}
+      driver.id = form.querySelector('input[name = "id"]').value
+      form.querySelector('input[name = "id"]').disabled= true
+      driver.DriverNo = form.querySelector('input[name = "DriverNo"]').value
+      driver.LastName= form.querySelector('input[name = "LastName"]').value
+      driver.FirstName = form.querySelector('input[name = "FirstName"]').value 
+      driver.Nationality = form.querySelector('input[name = "Nationality"]').value
+      driver.CurrentTeam = form.querySelector('input[name = "CurrentTeam"]').value
+      return driver
+    }
+
+
+
+    function addDriverToTable(driver){
+          tableElement = document.getElementById("driverTable")
+          rowElement= tableElement.insertRow(-1)
+          rowElement.setAttribute("id",driver.id)
+          cell1 = rowElement.insertCell(0);
+          cell1.innerHTML = driver.id
+          cell2 = rowElement.insertCell(1);
+          cell2.innerHTML = driver.DriverNo
+          cell3 = rowElement.insertCell(2);
+          cell3.innerHTML = driver.LastName
+          cell4 = rowElement.insertCell(3);
+          cell4.innerHTML = driver.FirstName
+          cell5 = rowElement.insertCell(4);
+          cell5.innerHTML = driver.Nationality
+          cell6 = rowElement.insertCell(5);
+          cell6.innerHTML = driver.CurrentTeam
+          cell7 = rowElement.insertCell(6);
+          cell7.innerHTML = '<button onclick = "showUpdate(this)" class = "button showUpdate">Update</button>'
+          cell8 = rowElement.insertCell(7);
+          cell8.innerHTML = '<button onclick = "doDelete(this)" class = "button doDelete">Delete</button>'
+          
+        }
+
+        populateTable()
+        
+    
+    
+      
+        
+      </script>
+</body>
+
+      
+    </html>
+    
+
